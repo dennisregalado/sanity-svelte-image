@@ -1,6 +1,17 @@
 {
 	"name": "sanity-svelte-image",
-	"version": "0.0.1",
+	"version": "0.0.2",
+	"description": "A Svelte component for rendering optimized Sanity images with automatic URL building and responsive support",
+	"author": "Dennis Regalado",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/dennisregalado/sanity-svelte-image.git"
+	},
+	"homepage": "https://github.com/dennisregalado/sanity-svelte-image#readme",
+	"bugs": {
+		"url": "https://github.com/dennisregalado/sanity-svelte-image/issues"
+	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run prepack",
@@ -29,13 +40,15 @@
 			"svelte": "./dist/index.js"
 		}
 	},
+	"dependencies": {
+		"@sanity-image/url-builder": "^1.0.0"
+	},
 	"peerDependencies": {
 		"svelte": "^5.0.0"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
 		"@eslint/js": "^9.18.0",
-		"@sanity-image/url-builder": "^1.0.0",
 		"@sveltejs/adapter-auto": "^6.0.0",
 		"@sveltejs/kit": "^2.22.0",
 		"@sveltejs/package": "^2.0.0",
@@ -54,7 +67,13 @@
 		"vite": "^7.0.4"
 	},
 	"keywords": [
-		"svelte"
+		"svelte",
+		"sanity",
+		"image",
+		"component",
+		"responsive",
+		"optimization",
+		"cms"
 	],
 	"pnpm": {
 		"onlyBuiltDependencies": [
