@@ -21,7 +21,6 @@ glance:
 - Tiny bundle size with minimal dependencies
 - TypeScript support
 - Works with SvelteKit and any other Svelte-based framework
-- Supports both `<img>` and `<source>` tag rendering for advanced use cases
 
 **Note**: Low-quality image preview support is not yet implemented but is planned for a future release.
 
@@ -68,18 +67,38 @@ size):
 <script lang="ts">
   import { Image } from 'sanity-svelte-image';
   
-  let { image } = $props();
+  let { image, heroImage, thumbnailImage } = $props();
 </script>
 
+<!-- Hero image with priority loading -->
+<Image
+  image={heroImage}
+  width={1200}
+  height={600}
+  mode="cover"
+  priority={true}
+  alt="Hero image"
+  class="w-full h-auto"
+/>
+
+<!-- Regular image with custom sizing -->
 <Image
   {image}
   width={500}
   height={250}
   mode="cover"
   queryParams={{ sharpen: 30, q: 80 }}
-  alt="Sweet Christmas!"
-  class="big-ol-image"
+  alt="Featured content"
+  class="rounded-lg shadow-md"
   sizes="(min-width: 500px) 500px, 100vw"
+/>
+
+<!-- Natural size image (preserves original dimensions) -->
+<Image
+  image={thumbnailImage}
+  natural={true}
+  alt="Thumbnail at natural size"
+  class="max-w-xs"
 />
 ```
 
@@ -112,8 +131,6 @@ How it works at a glance:
   `loading="eager"` for images above the fold or set `priority={true}`
 - The `alt` attribute will be set to an empty string if it isn't supplied; set
   it if it isn't a decorative image!
-- By default it renders an `img` tag, but you can pass `tag="source"` to render
-  a `<source>` element for use in `<picture>` elements
 - Query params passed to Sanity are all sorted and minimized for improved
   caching and smaller URLs
 
@@ -142,8 +159,6 @@ This component accepts all standard HTML `img` attributes plus the following San
 - `priority` (boolean) — Optional - When true, sets `loading="eager"`, 
   `fetchpriority="high"`, and `decoding="sync"` for above-the-fold images.
   Defaults to `false`.
-- `tag` ("img" | "source") — Optional - The HTML element to render. Use "source"
-  for `<picture>` elements. Defaults to `"img"`.
 - `baseUrl` (string) — Optional - Custom base URL for the Sanity CDN. If not
   provided, uses environment variables `PUBLIC_SANITY_PROJECT_ID` and 
   `PUBLIC_SANITY_DATASET`.
@@ -188,20 +203,59 @@ doesn't matter since the behavior will be the same.
   the image to completely fill the dimensions. The output image will match the
   aspect ratio of the dimensions you provide.
 
+### Using `priority` and `natural` props
+
+**Priority images** are for above-the-fold content that should load immediately:
+
+```svelte
+<!-- Hero image that should load first -->
+<Image
+  image={heroImage}
+  width={1200}
+  height={600}
+  priority={true}
+  alt="Page hero"
+  class="w-full h-auto"
+/>
+```
+
+**Natural sizing** preserves the original image dimensions without any resizing:
+
+```svelte
+<!-- Profile picture at its natural size -->
+<Image
+  image={avatarImage}
+  natural={true}
+  alt="User avatar"
+  class="rounded-full max-w-20"
+/>
+
+<!-- Logo that should maintain its exact proportions -->
+<Image
+  image={logoImage}
+  natural={true}
+  alt="Company logo"
+  class="h-12 w-auto"
+/>
+```
+
 ### Styling your images
 
-I recommend setting something like the following CSS for images in your project,
+I recommend setting something like the following Tailwind classes for images in your project,
 then overriding styles as needed. This will ensure images act like block-level
 elements with infinitely scalable contents even with the `width` and `height`
 attributes set:
 
 ```css
+/* Add to your global CSS */
 img {
-  display: block;
-  max-width: 100%;
-  width: 100%;
-  height: auto;
+  @apply block max-w-full w-full h-auto;
 }
+```
+
+Or apply directly to images:
+```svelte
+<Image {image} class="block max-w-full w-full h-auto" alt="My image" />
 ```
 
 Here's an example of how that works when using a 3-column grid:
@@ -213,7 +267,7 @@ Here's an example of how that works when using a 3-column grid:
   let { images } = $props();
 </script>
 
-<div class="grid">
+<div class="grid grid-cols-3 gap-4 max-w-screen-xl px-5 mx-auto">
   {#each images as image (image._id)}
     <div>
       <Image
@@ -221,21 +275,11 @@ Here's an example of how that works when using a 3-column grid:
         width={390}
         sizes="(min-width: 1240px) 390px, calc((100vw - 40px - 30px) / 3)"
         alt="Gallery image"
+        class="block max-w-full w-full h-auto"
       />
     </div>
   {/each}
 </div>
-
-<style>
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
-    max-width: 1240px;
-    padding-inline: 20px;
-    margin-inline: auto;
-  }
-</style>
 ```
 
 If you need these images to all match in height, switch to `cover` mode:
@@ -262,86 +306,23 @@ Using the Image component for background images:
   let { backgroundImage } = $props();
 </script>
 
-<section class="hero">
+<section class="relative py-24">
   <Image
     image={backgroundImage}
     width={1440}
-    class="hero-bg"
+    class="absolute inset-0 w-full h-full object-cover select-none z-0"
     alt=""
   />
   
-  <div class="hero-content">
-    <h1>Your big hero copy</h1>
-    <a href="/signup/" class="button">Get started</a>
+  <div class="relative z-10">
+    <h1 class="text-4xl font-bold">Your big hero copy</h1>
+    <a href="/signup/" class="inline-block mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+      Get started
+    </a>
   </div>
 </section>
-
-<style>
-  .hero {
-    position: relative;
-    padding-block: 100px;
-  }
-  
-  .hero :global(.hero-bg) {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    user-select: none;
-    z-index: 1;
-  }
-  
-  .hero-content {
-    position: relative;
-    z-index: 2;
-  }
-</style>
 ```
 
-### Using with `<picture>` elements
-
-For advanced responsive images with art direction:
-
-```svelte
-<script lang="ts">
-  import { Image } from 'sanity-svelte-image';
-  
-  let { image } = $props();
-</script>
-
-<picture>
-  <!-- Mobile version: square crop -->
-  <Image
-    {image}
-    tag="source"
-    width={400}
-    height={400}
-    mode="cover"
-    media="(max-width: 768px)"
-  />
-  
-  <!-- Desktop version: wide crop -->
-  <Image
-    {image}
-    tag="source"
-    width={800}
-    height={400}
-    mode="cover"
-    media="(min-width: 769px)"
-  />
-  
-  <!-- Fallback img -->
-  <Image
-    {image}
-    width={800}
-    height={400}
-    mode="cover"
-    alt="Responsive image"
-  />
-</picture>
-```
 
 ### Fetching data from Sanity via GROQ
 
@@ -351,9 +332,7 @@ recommend fetching the image fields:
 ```groq
 // For a simple image field
 image {
-  asset,
-  hotspot,
-  crop
+  ...
 }
 
 // If you need the asset reference directly
@@ -379,14 +358,7 @@ The component exports the following TypeScript types:
 ```typescript
 import type { 
   SanityImage,                        // Main component props type
-  SanityImageAsset,                   // Sanity image object type
-  SanityImageHotspot,                 // Hotspot data type
-  SanityImageCrop,                    // Crop data type
-  SanityImageConfigurationProps,      // Configuration props
-  SanityImageAttributeOverrideProps,  // HTML attribute override props
-  SanityImageComponentProps,          // Component-specific props
-  BaseImageProps,                     // Base image rendering props
-  FullImageProps                      // Complete props interface
+  SanityImageAsset                    // Sanity image object type
 } from 'sanity-svelte-image';
 
 // You can also import the baseUrl helper
@@ -396,9 +368,8 @@ import { baseUrl } from 'sanity-svelte-image';
 ## Roadmap
 
 - [ ] Low-quality image preview (LQIP) support
+- [ ] `<picture>` element support with `<source>` tag rendering
 - [ ] Blur-up transitions
-- [ ] WebP/AVIF format optimization hints
-- [ ] Batch image preloading utilities
 
 ## License
 
