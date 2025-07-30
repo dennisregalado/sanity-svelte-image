@@ -4,4 +4,14 @@ export {
     baseUrl,
     type SanityImage,
     type SanityImageAsset,
-} from './Image.svelte';
+} from './Image.svelte'; 
+export {
+    type Asset,
+    type HotspotData,
+    type CropData,
+    buildSrc,
+    buildSrcSet,
+    parseImageId,
+    assetId,
+    normalizeAssetId,
+} from "@sanity-image/url-builder"
