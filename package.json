@@ -1,6 +1,6 @@
 {
 	"name": "sanity-svelte-image",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"description": "A Svelte component for rendering optimized Sanity images with automatic URL building and responsive support",
 	"author": "Dennis Regalado",
 	"license": "MIT",
